@@ -1,24 +1,35 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*.pyo
+*$py.class
 
-# Environment
-.env
-.venv/
+# C extensions
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
 env/
 venv/
-*.conda
-*.env
-*.yml
+.venv/
+.env/
 
-# Jupyter
-.ipynb_checkpoints
+# Pytest cache
+.pytest_cache/
 
-# IDEs
+# IDE/editor settings
 .vscode/
 .idea/
+*.sublime-project
+*.sublime-workspace
 
-# Tests
-htmlcov/
-pytest_cache/
+# Logs and databases
+*.log
+*.sqlite3
+
+# macOS files
+.DS_Store

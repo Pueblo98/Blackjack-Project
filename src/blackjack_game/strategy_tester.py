@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # your existing simulators & strategies
-from bj_bots import simulate_strategy, simulate_martingale_strategy, basic_strategy, always_stand_strategy, hit_until_19_strategy,simulate_card_counting_strategy,index_play_strategy  # :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
+from bj_bots import simulate_strategy, simulate_martingale_strategy, basic_strategy, always_stand_strategy, hit_until_19_strategy,simulate_card_counting_strategy,index_play_strategy,basic_strategy_ignoring_count  # :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
 
 def build_trajectory(sim_fn, strat_fn, runs=100, max_hands=100, **kwargs):
     """
@@ -44,7 +44,7 @@ def main():
         initial_credits=init_credits,
         bet=base_bet
     )
-    
+    #hit until 19
     basic_hit = build_trajectory(
         simulate_strategy,
         hit_until_19_strategy,
@@ -74,7 +74,16 @@ def main():
         base_bet=base_bet,
         num_decks=4
     
+    )
     
+    basic_strategy_with_count = build_trajectory(
+        simulate_card_counting_strategy,
+        basic_strategy_ignoring_count,
+        runs=runs,
+        max_hands=hands,
+        initial_credits=init_credits,
+        base_bet=base_bet,
+        num_decks=4        
     )
 
     # Compute averages
@@ -83,7 +92,7 @@ def main():
     avg_cc    = cc_arr.mean(axis=0)
     avg_stand = basic_stand.mean(axis=0)
     avg_hit   = basic_hit.mean(axis=0)
-
+    avg_count_basic = basic_strategy_with_count.mean(axis=0)
 
     # Plot
     plt.figure(figsize=(8,5))
@@ -92,6 +101,7 @@ def main():
     plt.plot(range(1, hands+1), avg_cc,    label='Card Counting')
     plt.plot(range(1, hands+1), avg_stand, label='always stand')
     plt.plot(range(1, hands+1), avg_hit,   label='hit until 19')
+    plt.plot(range(1, hands+1), avg_count_basic,   label=' Counting strategy with basic play')
     plt.xlabel('Hand Number')
     plt.ylabel('Average Credits')
     plt.title(f'Average Credit Trajectory over {hands} Hands ({runs} Runs)')

@@ -1,21 +1,50 @@
-# My Project
+# Blackjack Simulation Project
 
-This is a simple Python project demonstrating structure, testing, and example usage.
+This project provides:
 
-## Features
-- `src/` contains source code.
-- `tests/` includes unit tests using `pytest`.
-- `examples/` provides sample usage.
+- A Blackjack environment (`bj.py`) for simulation.
+- Bots and strategies (`bj_bots.py`).
+- Tools to test strategies (`strategy_tester.py`).
 
 ## Installation
 
 ```bash
+# Create conda environment
 conda env create -f environment.yml
-conda activate my_project_env
+conda activate blackjack_project
+
+# Or using pip
+pip install -e .
+pip install numpy matplotlib pytest
 ```
 
-## Run Tests
+## Usage
 
+### Run examples
 ```bash
-pytest tests/
+python examples/run_basic_strategy.py
+python examples/run_martingale.py
+python examples/run_cardcounting.py
+python examples/run_strategy_tester.py
+```
+
+### Run tests
+```bash
+pytest
+```
+
+## Project Structure
+
+```
+src/
+  my_module.py
+  bj.py
+  bj_bots.py
+  bj_cardcounting.py
+  strategy_tester.py
+tests/
+examples/
+setup.py
+README.md
+environment.yml
 ```

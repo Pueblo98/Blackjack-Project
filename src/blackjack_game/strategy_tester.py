@@ -3,51 +3,95 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import your existing bots
-from bj_bots import simulate_strategy, basic_strategy, simulate_martingale_strategy
-from bj_cardcounting import simulate_card_counting_strategy
+# your existing simulators & strategies
+from bj_bots import simulate_strategy, simulate_martingale_strategy, basic_strategy, always_stand_strategy, hit_until_19_strategy,simulate_card_counting_strategy,index_play_strategy  # :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
 
-def build_trajectory(sim_fn, strategy_fn, runs=1, max_hands=100, **kwargs):
+def build_trajectory(sim_fn, strat_fn, runs=100, max_hands=100, **kwargs):
     """
-    For each run:
-      for h in 1..max_hands: call sim_fn(strategy_fn, num_hands=h, **kwargs)
-    Returns an array shape (runs, max_hands) of ending credits.
+    Returns an array shape (runs, max_hands) where entry [i,h-1]
+    is the ending credits after h hands in the i-th trial.
     """
-    traj = np.zeros((runs, max_hands))
+    arr = np.zeros((runs, max_hands))
     for i in range(runs):
         for h in range(1, max_hands+1):
-            # each call returns final credits after h hands
-            traj[i, h-1] = sim_fn(strategy_fn, num_hands=h, **kwargs)
-    return traj
+            arr[i, h-1] = sim_fn(
+                strat_fn,
+                num_hands=h,
+                **kwargs
+            )
+    return arr
 
 def main():
     runs, hands = 100, 100
     init_credits = 100.0
-    base_bet = 1.0
+    base_bet     = 1.0
 
-    # build arrays of shape (runs, hands)
-    fixed_arr = build_trajectory(simulate_strategy, basic_strategy,
-                                 runs=runs, max_hands=hands,
-                                 initial_credits=init_credits, bet=base_bet)
+    # Basic fixed‐bet strategy
+    basic_arr = build_trajectory(
+        simulate_strategy,
+        basic_strategy,
+        runs=runs,
+        max_hands=hands,
+        initial_credits=init_credits,
+        bet=base_bet
+    )
+    #always stand
+    basic_stand = build_trajectory(
+        simulate_strategy,
+        always_stand_strategy,
+        runs=runs,
+        max_hands=hands,
+        initial_credits=init_credits,
+        bet=base_bet
+    )
+    
+    basic_hit = build_trajectory(
+        simulate_strategy,
+        hit_until_19_strategy,
+        runs=runs,
+        max_hands=hands,
+        initial_credits=init_credits,
+        bet=base_bet
+    )
+    
+    # Martingale on basic strategy
+    mart_arr = build_trajectory(
+        simulate_martingale_strategy,
+        basic_strategy,
+        runs=runs,
+        max_hands=hands,
+        initial_credits=init_credits,
+        initial_bet=base_bet
+    )
 
-    mart_arr  = build_trajectory(simulate_martingale_strategy, basic_strategy,
-                                 runs=runs, max_hands=hands,
-                                 initial_credits=init_credits, initial_bet=base_bet)
+    # Hi-Lo card counting with index deviations
+    cc_arr = build_trajectory(
+        simulate_card_counting_strategy,
+        index_play_strategy,
+        runs=runs,
+        max_hands=hands,
+        initial_credits=init_credits,
+        base_bet=base_bet,
+        num_decks=4
+    
+    
+    )
 
-    cc_arr    = build_trajectory(simulate_card_counting_strategy, basic_strategy,
-                                 runs=runs, max_hands=hands,
-                                 initial_credits=init_credits, base_bet=base_bet, num_decks=6)
-
-    # average across runs
-    avg_fixed = fixed_arr.mean(axis=0)
+    # Compute averages
+    avg_basic = basic_arr.mean(axis=0)
     avg_mart  = mart_arr.mean(axis=0)
     avg_cc    = cc_arr.mean(axis=0)
+    avg_stand = basic_stand.mean(axis=0)
+    avg_hit   = basic_hit.mean(axis=0)
 
-    # plot
+
+    # Plot
     plt.figure(figsize=(8,5))
-    plt.plot(range(1, hands+1), avg_fixed, label='Basic Strategy')
+    plt.plot(range(1, hands+1), avg_basic, label='Basic Strategy')
     plt.plot(range(1, hands+1), avg_mart,  label='Martingale')
     plt.plot(range(1, hands+1), avg_cc,    label='Card Counting')
+    plt.plot(range(1, hands+1), avg_stand, label='always stand')
+    plt.plot(range(1, hands+1), avg_hit,   label='hit until 19')
     plt.xlabel('Hand Number')
     plt.ylabel('Average Credits')
     plt.title(f'Average Credit Trajectory over {hands} Hands ({runs} Runs)')

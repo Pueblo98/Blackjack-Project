@@ -101,16 +101,13 @@ def simulate_card_counting_strategy(
     num_hands: int = 100,
     initial_credits: float = 100.0,
     base_bet: float = 1.0,
-    num_decks: int = 4
+    num_decks: int = 6
 ) -> float:
     """
-    Simulate Hi-Lo card counting on a multi-deck shoe.
-
-    - strategy_fn: decision function (hit/stand)
-    - num_hands: rounds to play
-    - initial_credits: starting bankroll
-    - base_bet: minimum bet size
-    - num_decks: number of decks in shoe
+    Hi-Lo card counting with index plays and bet ramp:
+    - Tracks running and true count
+    - Bets = base_bet * max(1, int(true_count))
+    - Uses strategy_fn(state, true_count) for play decisions
     """
     game = BlackjackGame(num_decks=num_decks)
     credits = initial_credits
@@ -120,44 +117,42 @@ def simulate_card_counting_strategy(
         # Compute true count
         decks_remaining = max(1, len(game.deck) / 52)
         true_count = running_count / decks_remaining
-        # Bet ramp: increase bet with positive true count
-        bet = base_bet * max(1, int(true_count)+1) #check this
+        # Determine bet size
+        bet = base_bet * max(1, int(true_count))
         bet = min(bet, credits)
 
-        # Deal initial hands
+        # Deal initial
         state = game.reset()
-        # Update count for initial cards
-        for card in state['player_hand'] + [state['dealer_upcard']]:
-            running_count += hi_lo_value(card) #check that his works
+        player_cards = state['player_hand']
+        dealer_up = state['dealer_upcard']
+        # Count initial cards
+        for c in player_cards + [dealer_up]:
+            running_count += hi_lo_value(c)
 
-        done = False
-        reward = 0
-        # Play out the hand
+        done, reward = False, 0
+        # Player decisions
         while not done:
-            action = strategy_fn(state)
+            action = strategy_fn(state, true_count)
             state, reward, done = game.step(action)
             if action == 'hit' and not done:
                 running_count += hi_lo_value(state['player_hand'][-1])
 
-        # Reveal dealer cards and count them
-        for card in state.get('dealer_hand', [])[1:]:
-            running_count += hi_lo_value(card)
+        # Count dealer hole cards
+        for c in state.get('dealer_hand', [])[1:]:
+            running_count += hi_lo_value(c)
 
         # Payout
-        is_blackjack = game._hand_value(state['player_hand'][:2]) == 21
-        payout = compute_payout(is_blackjack, reward, bet)
-        credits += payout
+        is_bj = game._hand_value(player_cards) == 21
+        credits += compute_payout(is_bj, reward, bet)
 
-        # Shuffle/reset count when shoe is low
+        # Reshuffle if shoe low
         if len(game.deck) < 52:
             game._build_deck()
             running_count = 0
-
         if credits <= 0:
             break
 
     return credits
-
 
 # Strategy implementations
 
@@ -220,6 +215,40 @@ def basic_strategy(state):
     # Default
     return 'stand'
 
+def basic_strategy_ignoring_count(state, true_count):
+    # Completely ignore true_count, fall back to basic_strategy
+    return basic_strategy(state)
+
+
+def index_play_strategy(state: dict, true_count: float) -> str:
+    """
+    Deviations from basic strategy based on Hi-Lo true count indices:
+    - Hard 16 vs 10: stand if TC >= 0, else hit
+    - Hard 15 vs 10: stand if TC >= 4, else hit
+    - Hard 12 vs 3: hit if TC < 2, else stand
+    Otherwise, fallback to basic_strategy
+    """
+    cards = state['player_hand']
+    dealer = state['dealer_upcard']
+    total = sum(cards)
+    aces = cards.count(1)
+    soft_total = total + 10 if aces and total + 10 <= 21 else total
+    is_soft = (soft_total != total)
+    val = soft_total if is_soft else total
+
+    # Only apply to hard hands
+    if not is_soft:
+        # 16 vs 10
+        if val == 16 and dealer == 10:
+            return 'stand' if true_count >= 0 else 'hit'
+        # 15 vs 10
+        if val == 15 and dealer == 10:
+            return 'stand' if true_count >= 4 else 'hit'
+        # 12 vs 3
+        if val == 12 and dealer == 3:
+            return 'stand' if true_count >= 2 else 'hit'
+    # Fallback
+    return basic_strategy(state)
 
 
 
@@ -235,12 +264,17 @@ if __name__ == "__main__":
 
     print("Basic Strategy:")
     final_credits_basic = simulate_strategy(basic_strategy)
-    print(f"  Final credits after 100 hands: {final_credits_basic}")
+    print(f"  Final credits after 100 hands: {final_credits_basic}\n")
     
     print("Martingale with Basic Strategy:")
     final_martingale = simulate_martingale_strategy(basic_strategy)
-    print(f"  Final credits after 100 hands: {final_martingale}")
+    print(f"  Final credits after 100 hands: {final_martingale}\n")
+
+    print("Card counting with Basic Strategy:")
+    final = simulate_card_counting_strategy(basic_strategy_ignoring_count)
+    print(f"Final credits after 100 hands: {final}\n")
     
-    final_credits = simulate_card_counting_strategy(basic_strategy)
-    print(f"Final credits after 100 hands (Hi-Lo 4-deck): {final_credits}")
-    
+    print("Card counting with index play Strategy:")
+    final = simulate_card_counting_strategy(index_play_strategy)
+    print(f"Final credits after 100 hands : {final}\n")
+

@@ -1,4 +1,4 @@
-from bj import BlackjackGame
+from .bj import BlackjackGame
 
 # Setting up profit structure
 def compute_payout(is_blackjack: bool, reward: int, bet: float) -> float:

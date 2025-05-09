@@ -1,5 +1,5 @@
 import pytest
-from bj_bots import compute_payout, hi_lo_value
+from blackjack_game.bj_bots import compute_payout, hi_lo_value
 
 def test_compute_payout_win():
     assert compute_payout(is_blackjack=False, reward=1, bet=10) == 10

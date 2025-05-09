@@ -1,5 +1,5 @@
 import pytest
-from bj import BlackjackGame
+from blackjack_game.bj import BlackjackGame
 
 def test_ace_value():
     game = BlackjackGame(num_decks=1)

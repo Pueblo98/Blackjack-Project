@@ -1,12 +1,8 @@
-# strategy_tester.py
-
 import numpy as np
 import matplotlib.pyplot as plt
-
-# your existing simulators & strategies
 from bj_bots import simulate_strategy, simulate_martingale_strategy, basic_strategy, always_stand_strategy, hit_until_19_strategy,simulate_card_counting_strategy,index_play_strategy,basic_strategy_ignoring_count  # :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
 
-def build_trajectory(sim_fn, strat_fn, runs=100, max_hands=100, **kwargs):
+def build_trajectory(sim_fn, strat_fn, runs=100, max_hands=200, **kwargs):
     """
     Returns an array shape (runs, max_hands) where entry [i,h-1]
     is the ending credits after h hands in the i-th trial.
@@ -86,7 +82,6 @@ def main():
         num_decks=4        
     )
 
-    # Compute averages
     avg_basic = basic_arr.mean(axis=0)
     avg_mart  = mart_arr.mean(axis=0)
     avg_cc    = cc_arr.mean(axis=0)
@@ -94,7 +89,6 @@ def main():
     avg_hit   = basic_hit.mean(axis=0)
     avg_count_basic = basic_strategy_with_count.mean(axis=0)
 
-    # Plot
     plt.figure(figsize=(8,5))
     plt.plot(range(1, hands+1), avg_basic, label='Basic Strategy')
     plt.plot(range(1, hands+1), avg_mart,  label='Martingale')

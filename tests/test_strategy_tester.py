@@ -18,3 +18,30 @@ def test_build_trajectory_shape_and_values():
     for i in range(runs):
         for h in range(1, max_hands + 1):
             assert arr[i, h-1] == 2 * h
+
+def test_build_trajectory_zero_runs():
+    arr = build_trajectory(lambda *args, **kw: 0, lambda s: 'stand', runs=0, max_hands=5)
+    assert arr.shape == (0, 5)
+
+def test_build_trajectory_zero_hands():
+    arr = build_trajectory(lambda *args, **kw: 0, lambda s: 'stand', runs=5, max_hands=0)
+    assert arr.shape == (5, 0)
+
+def test_build_trajectory_kwargs_passed():
+    def sim_fn(strat_fn, num_hands, **kwargs):
+        # Echo a custom kwarg
+        return kwargs.get('foo', -1)
+    arr = build_trajectory(sim_fn, lambda s: None, runs=2, max_hands=3, foo=42)
+    assert (arr == 42).all()
+
+def test_build_trajectory_diff_strat_fn():
+    def sim_fn(strat_fn, num_hands, **kwargs):
+        return 1 if strat_fn is dummy1 else 2
+    def dummy1(state): pass
+    def dummy2(state): pass
+
+    arr1 = build_trajectory(sim_fn, dummy1, runs=1, max_hands=1)
+    arr2 = build_trajectory(sim_fn, dummy2, runs=1, max_hands=1)
+
+    assert arr1[0,0] == 1
+    assert arr2[0,0] == 2

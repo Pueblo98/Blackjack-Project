@@ -41,6 +41,7 @@ def simulate_strategy(strategy_fn, num_hands: int = 100, initial_credits: float 
         credits += payout
 
     return credits
+
 # Apply martignale strategy on betting amount
 def simulate_martingale_strategy(strategy_fn, num_hands: int = 100, initial_credits: float = 100.0, initial_bet: float = 1.0) -> float:
     """
@@ -226,32 +227,3 @@ def index_play_strategy(state: dict, true_count: float) -> str:
         if val == 12 and dealer == 3:
             return 'stand' if true_count >= 2 else 'hit'
     return basic_strategy(state)
-
-
-
-
-if __name__ == "__main__":
-    print("Always Stand Strategy:")
-    final_credits_stand = simulate_strategy(always_stand_strategy)
-    print(f"  Final credits after 100 hands: {final_credits_stand}\n")
-
-    print("Hit Until 19 Strategy:")
-    final_credits_hit19 = simulate_strategy(hit_until_19_strategy)
-    print(f"  Final credits after 100 hands: {final_credits_hit19}\n")
-
-    print("Basic Strategy:")
-    final_credits_basic = simulate_strategy(basic_strategy)
-    print(f"  Final credits after 100 hands: {final_credits_basic}\n")
-    
-    print("Martingale with Basic Strategy:")
-    final_martingale = simulate_martingale_strategy(basic_strategy)
-    print(f"  Final credits after 100 hands: {final_martingale}\n")
-
-    print("Card counting with Basic Strategy:")
-    final = simulate_card_counting_strategy(basic_strategy_ignoring_count)
-    print(f"Final credits after 100 hands: {final}\n")
-    
-    print("Card counting with index play Strategy:")
-    final = simulate_card_counting_strategy(index_play_strategy)
-    print(f"Final credits after 100 hands : {final}\n")
-

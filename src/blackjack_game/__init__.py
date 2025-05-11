@@ -1,9 +1,8 @@
-# blackjack_game/__init__.py
-
 from .bj import BlackjackGame
 from .bj_bots import (
     # Core functionality
     compute_payout,
+    # Betting strategy
     simulate_strategy,
     simulate_martingale_strategy,
     simulate_card_counting_strategy,

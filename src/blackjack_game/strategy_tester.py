@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from .bj_bots import simulate_strategy, simulate_martingale_strategy, basic_strategy, always_stand_strategy, hit_until_19_strategy,simulate_card_counting_strategy,index_play_strategy,basic_strategy_ignoring_count  # :contentReference[oaicite:0]{index=0}:contentReference[oaicite:1]{index=1}
-
+from .bj_bots import simulate_strategy, simulate_martingale_strategy, basic_strategy, always_stand_strategy, hit_until_19_strategy,simulate_card_counting_strategy,index_play_strategy,basic_strategy_ignoring_count 
 def build_trajectory(sim_fn, strat_fn, runs=100, max_hands=200, **kwargs):
     """
     Returns an array shape (runs, max_hands) where entry [i,h-1]

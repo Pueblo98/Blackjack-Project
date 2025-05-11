@@ -4,7 +4,9 @@ This project provides:
 
 - A Blackjack environment (`bj.py`) for simulation.
 - Bots and strategies (`bj_bots.py`).
-- Tools to test strategies (`strategy_tester.py`).
+- Tools to visualies strategies (`strategy_tester.py`).
+- Test specific strategiies and results (`examples/run_strategy_tester.py`)
+
 
 ## Installation
 
@@ -15,17 +17,17 @@ conda activate blackjack_project
 
 # Or using pip
 pip install -e .
-pip install numpy matplotlib pytest
+pip install numpy matplotlib pytest argparse
 ```
 
 ## Usage
 
 ### Run examples
 ```bash
-python examples/run_basic_strategy.py
+python examples/run_user_input.py
 python examples/run_martingale.py
-python examples/run_cardcounting.py
-python examples/run_strategy_tester.py
+python examples/run_simulations.py
+python examples/run_strategy_tester.py --list-strategies
 ```
 
 ### Run tests

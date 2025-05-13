@@ -1,11 +1,9 @@
 name: blackjack_project
 channels:
-  - defaults
+  - conda-forge
 dependencies:
-  - python=3.9
+  - python
   - pip
-  - pip:
-    - numpy
-    - matplotlib
-    - pytest
-    - argparse
+  - numpy
+  - matplotlib
+  - pytest
